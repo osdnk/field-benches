@@ -2,7 +2,7 @@
 
 AVX-512 multiplication benchmarks for two binary fields, aimed at sumcheck. Requires AVX512F + AVX512VBMI2 + VPCLMULQDQ; no scalar fallback.
 
-- **F(2^128)**, POLYVAL basis, modulus x^128+x^127+x^126+x^121+1, Montgomery form — the algorithm binius uses (`crates/field/src/arch/x86_64/pclmul/montgomery_mul.rs`, commit 47675e1, Apache-2.0), ported faithfully as the baseline.
+- **F(2^128)**, POLYVAL basis, modulus x^128+x^127+x^126+x^121+1, Montgomery form — the algorithm the archived binius used (`crates/field/src/arch/x86_64/pclmul/montgomery_mul.rs`, commit 47675e1, Apache-2.0), ported faithfully as the baseline. Its successor binius64 has since moved to the GHASH row below, without Montgomery.
 - **F(2^162)** = F2[x]/Phi_243, Phi_243 = x^162+x^81+1. Phi_243 divides x^243-1, so x^243 = 1 and x^162 = x^81+1: reduction is shifts and XORs only — no carry-less multiply (clmul, the `vpclmulqdq` instruction), no Montgomery.
 
 ## Results
