@@ -28,15 +28,6 @@ Multiply-accumulate (mac), reduction deferred to the end of a dot product (binar
 - Best vs best: an F162 multiply costs 1.56× an F128 multiply — 1.24× per field bit.
 - Deferred reduction is 2.06× faster than reducing every mul on F128, 1.40× on F162; the F162/F128 gap widens to 1.82× per bit because the cheap x^243 = 1 reduction is what gets amortised away, leaving raw clmul counts 6 vs 3.
 
-**Why word-slicing wins.** On this chip vpclmulqdq zmm takes 2 cycles and issues only on port 5 (the one execution port that issues both carry-less multiply and lane shuffles), and vpshufd/vpslldq/vpermt2q/vpunpck are also port-5-only at 1 cycle, so every lane shuffle costs half a clmul. Element-per-lane layouts (binius' `PackedBinaryPolyval4x128b`) spend port 5 shuffling 64-bit halves into clmul position; the word-sliced layout needs zero input shuffles, leaving only the product-word transpose. Port-5 cycles per 8 multiplications: 24 for binius' layout against 18 word-sliced, and 34 for F162. Both word-sliced kernels run at 94–95% of their dependency-free floor (the same instruction mix with no data dependencies). The residual F162 cost is limb count, not the modulus: 3 limbs → 6 clmuls → 27 field bits per clmul vs 42.7 for 2-limb F128.
-
-- Caveat: word-sliced kernels are a different memory format, so improving binius this way means a new packed type, not a patch.
-- Caveat: one microarchitecture only — Zen 4/5 have much better vpclmulqdq throughput, and the port-5 argument does not transfer.
-
-## Correctness
-
-11 tests: every SIMD kernel is checked lane-by-lane against a bit-serial scalar reference on random inputs; x has multiplicative order exactly 243 in the F162 reference, and binius' ONE = `0xc2000000000000000000000000000001` is the identity under the reference Montgomery multiply.
-
 ## Run
 
 ```
@@ -48,12 +39,10 @@ cargo bench                       # criterion; agrees within 5–8%
 
 ## Source
 
-Suffixes: `aos4` = one element per 128-bit lane, 4 per register; `soa8` = word-sliced, 8 per register.
-
 ```
 src/f128.rs       polyval_binius_aos4 (binius port), polyval_soa8, ghash_soa8, prods_soa8/mac_soa8/reduce_soa8
-src/f162.rs       mul_aos4_v0, mul_aos4_v1, mul_soa8, prods_soa8/mac_soa8/reduce_soa8
-src/reference.rs  bit-serial scalar references
+src/f162.rs       mul_soa8, prods_soa8/mac_soa8/reduce_soa8
+src/reference.rs  bit-serial scalar references (tests check every kernel against them)
 src/bin/probe.rs, src/bin/bench.rs, benches/mul.rs
 ```
 
