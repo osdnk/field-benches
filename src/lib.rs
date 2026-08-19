@@ -1,6 +1,9 @@
 pub mod f128;
 pub mod f162;
 pub mod reference;
+pub mod scalar;
+pub mod crossfield;
+pub mod sumcheck;
 
 pub fn has_avx512() -> bool {
     is_x86_feature_detected!("avx512f")

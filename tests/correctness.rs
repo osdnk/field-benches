@@ -239,3 +239,39 @@ fn f128_mac_deferred() {
         }
     }
 }
+
+#[test]
+fn scalar_b128_matches_reference() {
+    use bin_fields::scalar::B128;
+    let mut r = ChaCha8Rng::seed_from_u64(21);
+    for _ in 0..2000 {
+        let a: u128 = r.r#gen();
+        let b: u128 = r.r#gen();
+        assert_eq!((B128(a) * B128(b)).0, reference::mul_ghash(a, b));
+    }
+}
+
+#[test]
+fn scalar_f162_matches_reference() {
+    use bin_fields::scalar::F162;
+    let mut r = ChaCha8Rng::seed_from_u64(22);
+    for _ in 0..2000 {
+        let a = rand162(&mut r);
+        let b = rand162(&mut r);
+        assert_eq!((F162(a) * F162(b)).0, reference::mul162(a, b));
+    }
+}
+
+#[test]
+fn scalar_f162_order_243() {
+    use bin_fields::scalar::F162;
+    let x = F162([2, 0, 0]);
+    let mut acc = F162::ONE;
+    for k in 1..=243 {
+        acc = acc * x;
+        if k < 243 {
+            assert_ne!(acc, F162::ONE, "order divides {k}");
+        }
+    }
+    assert_eq!(acc, F162::ONE);
+}
