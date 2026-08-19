@@ -74,8 +74,8 @@ fn bench(c: &mut Criterion) {
     tput!(g, "f128/polyval_binius_aos4", 4, (0..NB).map(|i| v512(3000 + i as u64, !0)).collect::<Vec<_>>(), (0..NB).map(|i| v512(4000 + i as u64, !0)).collect::<Vec<_>>(), |x, y| unsafe { f128::polyval_binius_aos4(x, y) });
     tput!(g, "f128/polyval_soa8", 8, soa2(5000), soa2(6000), |x, y| unsafe { f128::polyval_soa8(x, y) });
     tput!(g, "f128/ghash_soa8", 8, soa2(7000), soa2(8000), |x, y| unsafe { f128::ghash_soa8(x, y) });
-    tput!(g, "f162/aos4_v0_cport", 4, aos4(100, false), aos4(900, false), |x, y| unsafe { f162::mul_aos4_v0(x, y) });
-    tput!(g, "f162/aos4_v1_opt", 4, aos4(200, true), aos4(950, true), |x, y| unsafe { f162::mul_aos4_v1(x, y) });
+    tput!(g, "f162/aos4_v0", 4, aos4(100, false), aos4(900, false), |x, y| unsafe { f162::mul_aos4_v0(x, y) });
+    tput!(g, "f162/aos4_v1", 4, aos4(200, true), aos4(950, true), |x, y| unsafe { f162::mul_aos4_v1(x, y) });
     tput!(g, "f162/soa8", 8, soa3(1), soa3(2000), |x, y| unsafe { f162::mul_soa8(x, y) });
     g.finish();
 

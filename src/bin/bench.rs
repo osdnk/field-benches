@@ -184,7 +184,7 @@ fn main() {
         measure("f128 ghash soa8", 128, 8, f128_soa(7000), f128_soa(8000), hz, |x, y| unsafe {
             f128::ghash_soa8(x, y)
         }),
-        measure("f162 aos4 v0 (C port)", 162, 4, f162_aos(100, false), f162_aos(900, false), hz, |x, y| unsafe {
+        measure("f162 aos4 v0", 162, 4, f162_aos(100, false), f162_aos(900, false), hz, |x, y| unsafe {
             f162::mul_aos4_v0(x, y)
         }),
         measure("f162 aos4 v1 (opt)", 162, 4, f162_aos(200, true), f162_aos(950, true), hz, |x, y| unsafe {
