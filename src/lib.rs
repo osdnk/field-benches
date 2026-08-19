@@ -24,26 +24,6 @@ pub mod probe_syms {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn k_f162_aos4_v1(a: *const __m512i, b: *const __m512i, o: *mut __m512i) {
-        let r = f162::mul_aos4_v1(
-            f162::Aos4 { q01: *a, q2: *a.add(1) },
-            f162::Aos4 { q01: *b, q2: *b.add(1) },
-        );
-        *o = r.q01;
-        *o.add(1) = r.q2;
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn k_f162_aos4_v0(a: *const __m512i, b: *const __m512i, o: *mut __m512i) {
-        let r = f162::mul_aos4_v0(
-            f162::Aos4 { q01: *a, q2: *a.add(1) },
-            f162::Aos4 { q01: *b, q2: *b.add(1) },
-        );
-        *o = r.q01;
-        *o.add(1) = r.q2;
-    }
-
-    #[no_mangle]
     pub unsafe extern "C" fn k_f128_soa8(a: *const __m512i, b: *const __m512i, o: *mut __m512i) {
         let r = f128::polyval_soa8([*a, *a.add(1)], [*b, *b.add(1)]);
         *o = r[0];

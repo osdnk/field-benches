@@ -14,9 +14,7 @@ Tiger Lake i7-11850H, one pinned core, ~4.6 GHz, L1-resident; ns/mul stable to 4
 | f128 polyval, binius layout | 128 | 4 | 1.081 | 5.0 |
 | f128 polyval, word-sliced | 128 | 8 | **0.702** | 3.2 |
 | f128 ghash (x^128+x^7+x^2+x+1), word-sliced | 128 | 8 | 0.738 | 3.4 |
-| f162, element-per-lane | 162 | 4 | 1.688 | 7.8 |
-| f162, element-per-lane, optimised | 162 | 4 | 1.516 | 7.0 |
-| f162, word-sliced | 162 | 8 | **1.097** | 5.0 |
+| f162, word-sliced | 162 | 8 | **1.097** | 5.1 |
 
 Multiply-accumulate (mac), reduction deferred to the end of a dot product (binary fields have no carries, so products XOR-accumulate unreduced indefinitely):
 
@@ -25,12 +23,12 @@ Multiply-accumulate (mac), reduction deferred to the end of a dot product (binar
 | f128 polyval | 128 | 0.341 |
 | f162 | 162 | 0.784 |
 
-- Word-slicing is **1.54×** on both fields.
-- Optimised F162 (1.097 ns) ties binius' current F128 (1.081 ns).
+- Word-slicing beats binius' layout by **1.54×** — same field, same Montgomery reduction, only the packing differs.
+- F162 (1.097 ns) ties binius' current F128 (1.081 ns): on this machine the extra 34 field bits cost nothing relative to what binius ships.
 - Best vs best: an F162 multiply costs 1.56× an F128 multiply — 1.24× per field bit.
 - Deferred reduction is 2.06× faster than reducing every mul on F128, 1.40× on F162; the F162/F128 gap widens to 1.82× per bit because the cheap x^243 = 1 reduction is what gets amortised away, leaving raw clmul counts 6 vs 3.
 
-**Why word-slicing wins.** On this chip vpclmulqdq zmm takes 2 cycles and issues only on port 5 (the one execution port that issues both carry-less multiply and lane shuffles), and vpshufd/vpslldq/vpermt2q/vpunpck are also port-5-only at 1 cycle, so every lane shuffle costs half a clmul. Element-per-lane layouts (binius' `PackedBinaryPolyval4x128b`) spend port 5 shuffling 64-bit halves into clmul position; the word-sliced layout needs zero input shuffles, leaving only the product-word transpose. Port-5 cycles per 8 muls: 24→18 (f128), 52→34 (f162); both optimised kernels run at 94–95% of their dependency-free floor (the same instruction mix with no data dependencies). The residual F162 cost is limb count, not the modulus: 3 limbs → 6 clmuls → 27 field bits per clmul vs 42.7 for 2-limb F128.
+**Why word-slicing wins.** On this chip vpclmulqdq zmm takes 2 cycles and issues only on port 5 (the one execution port that issues both carry-less multiply and lane shuffles), and vpshufd/vpslldq/vpermt2q/vpunpck are also port-5-only at 1 cycle, so every lane shuffle costs half a clmul. Element-per-lane layouts (binius' `PackedBinaryPolyval4x128b`) spend port 5 shuffling 64-bit halves into clmul position; the word-sliced layout needs zero input shuffles, leaving only the product-word transpose. Port-5 cycles per 8 multiplications: 24 for binius' layout against 18 word-sliced, and 34 for F162. Both word-sliced kernels run at 94–95% of their dependency-free floor (the same instruction mix with no data dependencies). The residual F162 cost is limb count, not the modulus: 3 limbs → 6 clmuls → 27 field bits per clmul vs 42.7 for 2-limb F128.
 
 - Caveat: word-sliced kernels are a different memory format, so improving binius this way means a new packed type, not a patch.
 - Caveat: one microarchitecture only — Zen 4/5 have much better vpclmulqdq throughput, and the port-5 argument does not transfer.
