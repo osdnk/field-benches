@@ -24,7 +24,6 @@ Multiply-accumulate (mac), reduction deferred to the end of a dot product (binar
 | f162 | 162 | 0.784 |
 
 - Word-slicing beats binius' layout by **1.54×** — same field, same Montgomery reduction, only the packing differs.
-- F162 (1.097 ns) ties binius' current F128 (1.081 ns): on this machine the extra 34 field bits cost nothing relative to what binius ships.
 - Best vs best: an F162 multiply costs 1.56× an F128 multiply — 1.24× per field bit.
 - Deferred reduction is 2.06× faster than reducing every mul on F128, 1.40× on F162; the F162/F128 gap widens to 1.82× per bit because the cheap x^243 = 1 reduction is what gets amortised away, leaving raw clmul counts 6 vs 3.
 
